@@ -31,11 +31,11 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <Button variant="ghost" size="sm">
-            Sign In
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/auth/login">Sign In</Link>
           </Button>
-          <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
-            Start Free Trial
+          <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:opacity-90" asChild>
+            <Link href="/auth/sign-up">Start Free Trial</Link>
           </Button>
         </div>
 
@@ -61,11 +61,11 @@ export function Header() {
               Pricing
             </Link>
             <div className="flex flex-col gap-2 pt-4">
-              <Button variant="ghost" size="sm">
-                Sign In
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/auth/login">Sign In</Link>
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
-                Start Free Trial
+              <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:opacity-90" asChild>
+                <Link href="/auth/sign-up">Start Free Trial</Link>
               </Button>
             </div>
           </nav>
