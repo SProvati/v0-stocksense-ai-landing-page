@@ -23,7 +23,6 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
@@ -40,6 +39,7 @@ export default function SignUpPage() {
     }
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -55,18 +55,26 @@ export default function SignUpPage() {
       if (error) throw error
       router.push('/auth/sign-up-success')
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      if (error instanceof Error) {
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          setError('Network error. Please check your internet connection and try again.')
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleGoogleSignUp = async () => {
-    const supabase = createClient()
     setIsGoogleLoading(true)
     setError(null)
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -75,9 +83,18 @@ export default function SignUpPage() {
             `${window.location.origin}/auth/callback`,
         },
       })
-      if (error) throw error
+      if (error) {
+        if (error.message.includes('provider') || error.message.includes('not enabled')) {
+          throw new Error('Google sign-in is not configured. Please use email/password to sign up.')
+        }
+        throw error
+      }
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('Failed to connect to Google. Please try again or use email/password.')
+      }
       setIsGoogleLoading(false)
     }
   }

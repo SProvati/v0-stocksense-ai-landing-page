@@ -20,11 +20,11 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -32,18 +32,28 @@ export default function LoginPage() {
       if (error) throw error
       router.push('/protected')
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      if (error instanceof Error) {
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          setError('Network error. Please check your internet connection and try again.')
+        } else if (error.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please check your credentials.')
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleGoogleLogin = async () => {
-    const supabase = createClient()
     setIsGoogleLoading(true)
     setError(null)
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -52,9 +62,18 @@ export default function LoginPage() {
             `${window.location.origin}/auth/callback`,
         },
       })
-      if (error) throw error
+      if (error) {
+        if (error.message.includes('provider') || error.message.includes('not enabled')) {
+          throw new Error('Google sign-in is not configured. Please use email/password to sign in.')
+        }
+        throw error
+      }
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('Failed to connect to Google. Please try again or use email/password.')
+      }
       setIsGoogleLoading(false)
     }
   }
